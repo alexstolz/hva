@@ -23,4 +23,3 @@ def gen_poem_docs(me, data=namespaces):
 
 for ns in namespaces.keys()-["ontology", "dict"]:
     gen_poem_docs(me=ns)
-
