@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title tal:content="data[me][1]"></title>
+	<!-- Latest compiled and minified CSS -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+	<!-- Optional theme -->
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+	<style rel="stylesheet">
+		body { padding-top: 70px; }
+	</style>
+</head>
+<body>
+	<nav class="navbar navbar-inverse navbar-fixed-top">
+		<div class="container">
+			<div class="navbar-header">
+				<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target=".navbar-collapse" aria-expanded="false">
+					<span class="sr-only">Toggle navigation</span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+					<span class="icon-bar"></span>
+				</button>
+				<a class="navbar-brand" href="ontology#">Hartmann von Aue</a>
+			</div>
+			<div class="navbar-collapse collapse">
+				<ul class="nav navbar-nav">
+					<li tal:repeat="ns data.keys()" tal:attributes="class 'active' if ns==me else None"><a href="${ns}" tal:content="data[ns][1]"></a></li>
+				</ul>
+			</div>
+		</div>
+	</nav>
+	<div class="container">
+		<section>
+			<div class="jumbotron">
+				<h1>${data[me][1]} <small>${data[me][0]}</small></h1>
+				<p class="lead">On this page, the dataset related to "${data[me][1]}" (<mark>${me}</mark>) is represented in human-readable form.</p>
+			</div>
+			<p>This document describes part of the knowledge base (<a href="${data[me][2]}">${data[me][1]}</a>) to the Linked Open Data version of the <a href="http://www.hva.uni-trier.de/"><abbr title="Hartmann von Aue">HvA</abbr> portal</a>, a decade-long initiative by Professor Roy Boggs to provide a modern Web-based knowledge base of the works of Hartman von Aue.</p>
+			<p>Any entity in this dataset is subsumed under the common namespace <code>${data[me][0]}</code>.</p>
+			<h2>How can I access the "${data[me][1]}" dataset?</h2>
+			<p>The server supports two simple methods to access the machine-readable <abbr title="Resource Description Framework">RDF</abbr> file:</p>
+			<ol type="a">
+				<li>Supply file extensions</li>
+				<li>Use content negotiation</li>
+			</ol>
+			<div class="table-responsive">
+				<table class="table table-condensed table-hover small">
+					<tr><th>Supported File Extensions</th><th>Supported Content Types</th></tr>
+					<tr><td>.rdf</td><td>application/rdf+xml</td></tr>
+					<tr><td>.n3</td><td>text/n3</td></tr>
+					<tr><td>.nt</td><td>text/plain</td></tr>
+				</table>
+			</div>
+			<div>
+				<p>Example with file extensions:</p>
+				<pre>curl -I ${base}${me}.rdf</pre>
+				<p>Example with content negotiation:</p>
+				<pre>curl -I -L -H "Accept: application/rdf+xml" ${base}${me}</pre>
+				<p>The server response is both times the same:</p>
+				<samp>
+					HTTP/1.1 200 OK<br>
+					Content-Type: application/rdf+xml<br>
+					...
+				</samp>
+			</div>
+			<h2>How can I query the data related to "${data[me][1]}"?</h2>
+			<p>The data in this knowledge base can be made accessible through a <abbr title="SPARQL Protocol and RDF Query Language">SPARQL</abbr> endpoint and queried as follows:</p>
+			<pre># Lemma in context
+
+PREFIX hva: &lt;${base}ontology#&gt;
+PREFIX data: &lt;${base}${me}#&gt;
+
+select ?lemma ?vnum ?text
+where {
+  ?word_uri a hva:Word .
+  ?word_uri rdfs:isDefinedBy data:Ontology .
+  ?word_uri hva:lemma ?lemma .
+  ?word_uri hva:verseNumber ?vnum .
+  ?word_uri hva:partOfVerse ?verse_uri .
+  ?verse_uri hva:text ?text .
+}
+order by asc (?lemma)
+</pre>
+			<p>The above query executed against an endpoint containing the "${data[me][1]}" (<mark>${me}</mark>) dataset would return a result set with entries for the lemma, the verse number, and the verse text.</p>
+			<h2>Sitemap</h2>
+			<p>Other human-readable documents that belong to this project:</p>
+			<dl class="dl-horizontal" tal:repeat="item data">
+				<dt><a href="${data[item][0]}">${data[item][0]}</a></dt>
+				<dd>${data[item][1]}</dd>
+			</dl>
+		</section>
+		<footer>
+			<h3>Contact</h3>
+			<address>
+				<strong>Univ.-Prof. Dr. Martin Hepp</strong><br>
+				E-Business and Web Science Research Group, Chair of General Management and E-Business<br>
+				Universität der Bundeswehr München<br>
+				Werner-Heisenberg-Weg 39<br>
+				D-85579 Neubiberg, Germany<br>
+				<br>
+				<abbr title="Phone number">T</abbr> +49-89-6004-4217<br>
+				<abbr title="E-mail address">E</abbr> martin.hepp (at) unibw.de
+			</address>
+			<h3>Acknowledgements</h3>
+			<p>The ontology and knowledge base is derived from the Hartman von Aue portal, a decade-long initiative by <a href="http://www.fgcu.edu/CoB/5446.asp">Professor Roy Boggs</a> to provide a modern Web-based knowledge base of the works of Hartman von Aue. The conversion and deployment of this linguistic dataset was realized by Alex Stolz, a member of the E-Business and Web Science Research Group at the Universität der Bundeswehr München.</p>
+			<p><small>
+				<strong>Developer:</strong> Alex Stolz<br>
+				<strong>Disclaimer:</strong> This service is provided by the E-Business and Web Science Research Group at Universität der Bundeswehr München as it is with no explicit or implicit guarantees.</small></p>
+			<p class="text-center"><small>&copy; 2017 E-Business and Web Science Research Group</small></p>
+		</footer>
+	</div>
+	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+	<!-- Latest compiled and minified JavaScript -->
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+</body>
+</html>
